@@ -6,6 +6,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [analysis, setAnalysis] = useState(null);
+  const [includeAI, setIncludeAI] = useState(false);
 
   const handleAnalyze = async () => {
     if (!text || text.trim().length === 0) {
@@ -23,7 +24,7 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, includeAI }),
       });
       const data = await res.json();
       if (data.success) {
@@ -53,6 +54,7 @@ function App() {
           <h1>Text Analyzer</h1>
           <p>Analyze your text instantly with AI-powered insights</p>
         </header>
+        {/* text area */}
         <div className='input-section'>
           <textarea
             rows={10}
@@ -61,6 +63,18 @@ function App() {
             placeholder='Enter or paste your text here'
           ></textarea>
         </div>
+        {/* checkbox */}
+        <div className='ai-toggle'>
+          <label>
+            <input
+              type='checkbox'
+              checked={includeAI}
+              onChange={(e) => setIncludeAI(e.target.checked)}
+            />
+            <span> ✨Include AI Analysis (Powered by GPT-4o-mini)</span>
+          </label>
+        </div>
+        {/* buttons */}
         <div className='button-group'>
           <button
             onClick={handleAnalyze}
@@ -73,7 +87,9 @@ function App() {
             Clear
           </button>
         </div>
+        {/* error */}
         {error && <div className='error-message'>⚠️ {error}</div>}
+        {/* analysis */}
         {analysis && (
           <div className='results-section'>
             <h2>Analysis Results</h2>
@@ -116,6 +132,40 @@ function App() {
               </div>
             </div>
           </div>
+        )}
+        {/* ai analysis */}
+        {analysis && analysis.ai && !analysis.ai.error && (
+          <div className='ai-results'>
+            <h3>🤖 AI Insights</h3>
+
+            <div className='ai-card'>
+              <h4>📝 Summary</h4>
+              <p>{analysis.ai.summary}</p>
+            </div>
+            <div className='ai-card'>
+              <h4>💭 Sentiment</h4>
+              <p
+                className={`sentiment ${analysis.ai.sentiment?.toLowerCase()}`}
+              >
+                {analysis.ai.sentiment}
+              </p>
+            </div>
+            <div className='ai-card'>
+              <h4>🎯 Key Points</h4>
+              <ul>
+                {analysis.ai.keyPoints?.map((point, index) => (
+                  <li key={index}>{point}</li>
+                ))}
+              </ul>
+            </div>
+            <div className='ai-card'>
+              <h4>🎨 Tone & Style</h4>
+              <p>{analysis.ai.tone}</p>
+            </div>
+          </div>
+        )}
+        {analysis && analysis.ai.error && (
+          <div className='error-message'>{analysis.ai.error}</div>
         )}
 
         <footer>
